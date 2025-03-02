@@ -54,15 +54,23 @@ export const Grid: React.FC<GridProps> = ({
       }
     });
 
-    dependencies.forEach(depId => {
-      const cell = newData[depId];
-      if (cell?.formula) {
-        cell.value = evaluateFormula(cell.formula, getCellValue) || '';
+    dependencies.forEach(cellId => {
+      if (newData[cellId]?.formula) {
+        const result = evaluateFormula(newData[cellId].formula || '', getCellValue) || '';
+        newData[cellId] = {
+          ...newData[cellId],
+          value: result
+        };
       }
     });
 
+    // Ensure cell sizes adjust properly when format changes
+    if (updates.format?.fontSize) {
+      // Row height adjustment can be added here if needed
+    }
+
     onChange(newData);
-  }, [data, onChange, getCellValue]);
+  }, [data, getCellValue, onChange]);
 
   const handleCellNavigation = (cellId: string, direction: 'up' | 'down' | 'left' | 'right') => {
     const { col, row } = getCellCoordinates(cellId);
