@@ -67,11 +67,21 @@ export const Grid: React.FC<GridProps> = ({
     // Ensure cell sizes adjust properly when format changes
     if (updates.format?.fontSize) {
       // Automatically adjust row height based on font size
-      const fontSize = updates.format.fontSize;
-      const newHeight = Math.max(24, Math.floor(fontSize * 1.5)); // Base height on font size
+      const fontSize = parseInt(updates.format.fontSize.toString());
+      const { row } = getCellCoordinates(cellId);
+      const rowStr = row.toString();
       
-      // We could implement dynamic row height adjustment here if needed
-      // For now, we'll let the cell handle overflow
+      // Calculate new height based on font size
+      const newHeight = Math.max(24, Math.ceil(fontSize * 1.5));
+      
+      // Update the spreadsheet with the new row height
+      onChange({
+        ...newData,
+        _rowHeights: {
+          ...(newData._rowHeights || {}),
+          [rowStr]: newHeight
+        }
+      });
     }
 
     onChange(newData);
@@ -123,7 +133,7 @@ export const Grid: React.FC<GridProps> = ({
           <div key={row} className="flex">
             <div
               className="sticky left-0 w-10 border-b border-r border-gray-300 bg-gray-100 flex items-center justify-center font-semibold"
-              style={{ height: rowHeights?.[row.toString()] || 24 }}
+              style={{ height: rowHeights?.[row.toString()] || data._rowHeights?.[row.toString()] || 24 }}
             >
               {row + 1}
             </div>
@@ -139,7 +149,7 @@ export const Grid: React.FC<GridProps> = ({
                   onChange={(updates) => updateCell(cellId, updates)}
                   onNavigate={(direction) => handleCellNavigation(cellId, direction)}
                   width={columnWidths?.[cellId] || 100}
-                  height={rowHeights?.[row.toString()] || 24}
+                  height={rowHeights?.[row.toString()] || data._rowHeights?.[row.toString()] || 24}
                 />
               );
             })}

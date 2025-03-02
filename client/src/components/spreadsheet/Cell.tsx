@@ -175,6 +175,9 @@ export const Cell: React.FC<CellProps> = ({
             cell.format?.align === 'right' && "justify-end text-right",
             cell.format?.align === 'left' && "justify-start text-left"
           )}
+          style={{
+            minHeight: cell.format?.fontSize ? `${Math.ceil(parseInt(cell.format.fontSize.toString()) * 1.5)}px` : undefined
+          }}
         >
           {formatCell(cell)}
         </div>
