@@ -33,6 +33,12 @@ export function evaluateFormula(formula: string, getCellValue: (ref: string) => 
 }
 
 function parseRange(range: string): string[] {
+  // Handle comma-separated references
+  if (range.includes(',')) {
+    return range.split(',').map(ref => ref.trim());
+  }
+
+  // Handle range with colon
   const [start, end] = range.split(':');
   if (!end) return [start];
 
@@ -127,7 +133,6 @@ function removeDuplicates(formula: string, getCellValue: (ref: string) => string
 }
 
 function findAndReplace(formula: string, getCellValue: (ref: string) => string | undefined): string {
-  // Extract find and replace terms from the formula
   const params = extractRange(formula).split(',').map(p => p.trim());
   if (params.length !== 3) return '#ERROR!';
 
@@ -135,7 +140,6 @@ function findAndReplace(formula: string, getCellValue: (ref: string) => string |
   const value = getCellValue(range);
   if (!value || !find) return value || '';
 
-  // Remove quotes if they exist
   const findStr = find.replace(/^["']|["']$/g, '');
   const replaceStr = replace.replace(/^["']|["']$/g, '');
 
