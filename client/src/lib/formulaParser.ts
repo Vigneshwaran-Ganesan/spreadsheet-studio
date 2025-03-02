@@ -1,8 +1,8 @@
 export function evaluateFormula(formula: string, getCellValue: (ref: string) => string | undefined): string | undefined {
   if (!formula.startsWith('=')) return formula;
-  
+
   const expression = formula.substring(1).trim().toUpperCase();
-  
+
   try {
     if (expression.startsWith('SUM(')) {
       return calculateSum(expression, getCellValue);
@@ -20,30 +20,34 @@ export function evaluateFormula(formula: string, getCellValue: (ref: string) => 
       return applyUpper(expression, getCellValue);
     } else if (expression.startsWith('LOWER(')) {
       return applyLower(expression, getCellValue);
+    } else if (expression.startsWith('REMOVE_DUPLICATES(')) {
+      return removeDuplicates(expression, getCellValue);
+    } else if (expression.startsWith('FIND_AND_REPLACE(')) {
+      return findAndReplace(expression, getCellValue);
     }
   } catch (error) {
     return '#ERROR!';
   }
-  
+
   return '#INVALID!';
 }
 
 function parseRange(range: string): string[] {
   const [start, end] = range.split(':');
   if (!end) return [start];
-  
+
   const startCol = start.match(/[A-Z]+/)?.[0] || '';
   const startRow = parseInt(start.match(/\d+/)?.[0] || '0');
   const endCol = end.match(/[A-Z]+/)?.[0] || '';
   const endRow = parseInt(end.match(/\d+/)?.[0] || '0');
-  
+
   const cells: string[] = [];
   for (let col = startCol.charCodeAt(0); col <= endCol.charCodeAt(0); col++) {
     for (let row = startRow; row <= endRow; row++) {
       cells.push(`${String.fromCharCode(col)}${row}`);
     }
   }
-  
+
   return cells;
 }
 
@@ -51,8 +55,10 @@ function getRangeValues(range: string, getCellValue: (ref: string) => string | u
   const cells = parseRange(range);
   return cells.map(cell => {
     const value = getCellValue(cell);
-    return value ? parseFloat(value) : undefined;
-  }).filter(v => v !== undefined) as number[];
+    if (!value) return undefined;
+    const num = parseFloat(value);
+    return isNaN(num) ? undefined : num;
+  }).filter(v => v !== undefined);
 }
 
 function extractRange(formula: string): string {
@@ -63,25 +69,29 @@ function extractRange(formula: string): string {
 function calculateSum(formula: string, getCellValue: (ref: string) => string | undefined): string {
   const range = extractRange(formula);
   const values = getRangeValues(range, getCellValue);
-  return values.reduce((sum, val) => sum + val, 0).toString();
+  if (values.length === 0) return '0';
+  return values.reduce((sum, val) => (sum || 0) + (val || 0), 0).toString();
 }
 
 function calculateAverage(formula: string, getCellValue: (ref: string) => string | undefined): string {
   const range = extractRange(formula);
   const values = getRangeValues(range, getCellValue);
-  return (values.reduce((sum, val) => sum + val, 0) / values.length).toString();
+  if (values.length === 0) return '#DIV/0!';
+  return (values.reduce((sum, val) => (sum || 0) + (val || 0), 0) / values.length).toString();
 }
 
 function calculateMax(formula: string, getCellValue: (ref: string) => string | undefined): string {
   const range = extractRange(formula);
   const values = getRangeValues(range, getCellValue);
-  return Math.max(...values).toString();
+  if (values.length === 0) return '#N/A';
+  return Math.max(...values.filter(v => v !== undefined) as number[]).toString();
 }
 
 function calculateMin(formula: string, getCellValue: (ref: string) => string | undefined): string {
   const range = extractRange(formula);
   const values = getRangeValues(range, getCellValue);
-  return Math.min(...values).toString();
+  if (values.length === 0) return '#N/A';
+  return Math.min(...values.filter(v => v !== undefined) as number[]).toString();
 }
 
 function calculateCount(formula: string, getCellValue: (ref: string) => string | undefined): string {
@@ -106,4 +116,28 @@ function applyLower(formula: string, getCellValue: (ref: string) => string | und
   const range = extractRange(formula);
   const value = getCellValue(range);
   return value ? value.toLowerCase() : '';
+}
+
+function removeDuplicates(formula: string, getCellValue: (ref: string) => string | undefined): string {
+  const range = extractRange(formula);
+  const cells = parseRange(range);
+  const values = cells.map(cell => getCellValue(cell));
+  const uniqueValues = Array.from(new Set(values));
+  return uniqueValues.filter(v => v !== undefined).join(',');
+}
+
+function findAndReplace(formula: string, getCellValue: (ref: string) => string | undefined): string {
+  // Extract find and replace terms from the formula
+  const params = extractRange(formula).split(',').map(p => p.trim());
+  if (params.length !== 3) return '#ERROR!';
+
+  const [range, find, replace] = params;
+  const value = getCellValue(range);
+  if (!value || !find) return value || '';
+
+  // Remove quotes if they exist
+  const findStr = find.replace(/^["']|["']$/g, '');
+  const replaceStr = replace.replace(/^["']|["']$/g, '');
+
+  return value.replace(new RegExp(findStr, 'g'), replaceStr);
 }
