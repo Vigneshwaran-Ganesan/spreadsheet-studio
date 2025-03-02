@@ -22,22 +22,72 @@ export function getCellId(col: number, row: number): string {
 
 export function findCellDependencies(formula: string): string[] {
   if (!formula?.startsWith('=')) return [];
-  
+
   const cellRefs = formula.match(/[A-Z]+\d+/g);
   return cellRefs || [];
 }
 
+export type DataType = 'text' | 'number' | 'date' | 'boolean';
+
+export interface ValidationResult {
+  isValid: boolean;
+  type: DataType;
+  error?: string;
+}
+
+export function validateCellInput(value: string): ValidationResult {
+  // Check for number
+  if (/^-?\d*\.?\d*$/.test(value)) {
+    return { isValid: true, type: 'number' };
+  }
+
+  // Check for date (YYYY-MM-DD format)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) {
+      return { isValid: true, type: 'date' };
+    }
+    return {
+      isValid: false,
+      type: 'text',
+      error: 'Invalid date format. Use YYYY-MM-DD'
+    };
+  }
+
+  // Check for boolean
+  if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
+    return { isValid: true, type: 'boolean' };
+  }
+
+  // Default to text
+  return { isValid: true, type: 'text' };
+}
+
 export function formatCell(cell: Cell): string {
   if (!cell.value) return '';
-  
+
   if (cell.formula?.startsWith('=')) {
+    // For formulas, return the calculated value
     return cell.value;
   }
-  
-  const num = parseFloat(cell.value);
-  if (!isNaN(num)) {
-    return num.toLocaleString();
+
+  if (cell.type === 'number') {
+    const num = parseFloat(cell.value);
+    if (!isNaN(num)) {
+      return num.toLocaleString();
+    }
   }
-  
+
+  if (cell.type === 'date') {
+    const date = new Date(cell.value);
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleDateString();
+    }
+  }
+
+  if (cell.type === 'boolean') {
+    return cell.value.toLowerCase() === 'true' ? 'TRUE' : 'FALSE';
+  }
+
   return cell.value;
 }

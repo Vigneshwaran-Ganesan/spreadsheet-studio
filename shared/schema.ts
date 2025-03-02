@@ -1,10 +1,11 @@
-import { pgTable, text, serial, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const cellSchema = z.object({
   value: z.string().optional(),
   formula: z.string().optional(),
+  type: z.enum(['text', 'number', 'date', 'boolean']).optional(),
   format: z.object({
     bold: z.boolean().optional(),
     italic: z.boolean().optional(),

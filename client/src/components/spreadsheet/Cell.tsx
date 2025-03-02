@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import type { Cell as CellType } from '@shared/schema';
-import { formatCell } from '@/lib/cellUtils';
+import { formatCell, validateCellInput } from '@/lib/cellUtils';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface CellProps {
   id: string;
@@ -25,6 +26,7 @@ export const Cell: React.FC<CellProps> = ({
 }) => {
   const [editing, setEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (selected && editing && inputRef.current) {
@@ -48,9 +50,27 @@ export const Cell: React.FC<CellProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+
+    // Skip validation for formulas
+    if (value.startsWith('=')) {
+      onChange({ value, formula: value });
+      return;
+    }
+
+    const validation = validateCellInput(value);
+    if (!validation.isValid) {
+      toast({
+        title: "Invalid Input",
+        description: validation.error,
+        variant: "destructive",
+      });
+      return;
+    }
+
     const updates: Partial<CellType> = {
       value,
-      formula: value.startsWith('=') ? value : undefined
+      type: validation.type,
+      formula: undefined
     };
     onChange(updates);
   };
