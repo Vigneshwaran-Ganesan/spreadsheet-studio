@@ -170,15 +170,18 @@ export const Cell: React.FC<CellProps> = ({
       ) : (
         <div 
           className={cn(
-            "px-2 w-full h-full flex items-center overflow-hidden",
-            cell.format?.align === 'center' && "justify-center text-center",
-            cell.format?.align === 'right' && "justify-end text-right",
-            cell.format?.align === 'left' && "justify-start text-left"
+            "px-2 w-full h-full overflow-hidden",
+            cell.format?.align === 'center' && "text-center",
+            cell.format?.align === 'right' && "text-right",
+            cell.format?.align === 'left' && "text-left"
           )}
           style={{
             minHeight: cell.format?.fontSize ? `${Math.ceil(parseInt(cell.format.fontSize.toString()) * 1.5)}px` : undefined,
             wordBreak: "break-word",
-            whiteSpace: "pre-wrap"
+            whiteSpace: "pre-wrap",
+            display: "block",
+            padding: "4px 8px",
+            boxSizing: "border-box"
           }}
         >
           {formatCell(cell)}

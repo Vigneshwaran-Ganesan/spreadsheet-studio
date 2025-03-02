@@ -10,7 +10,8 @@ export default function Home() {
     id: 1,
     data: {},
     columnWidths: {},
-    rowHeights: {}
+    rowHeights: {},
+    _rowHeights: {}
   });
 
   const [selectedCell, setSelectedCell] = useState<string | null>(null);

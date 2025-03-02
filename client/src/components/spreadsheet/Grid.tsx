@@ -79,10 +79,24 @@ export const Grid: React.FC<GridProps> = ({
     
     // Adjust for content length
     if (currentCell.value) {
-      const contentLength = currentCell.value.length;
-      const lines = currentCell.value.split('\n').length;
-      // Estimate additional height needed for long content
-      const contentHeight = Math.max(24, 24 * lines);
+      // Calculate approximate line breaks based on content length and cell width
+      const fontSize = currentCell.format?.fontSize ? parseInt(currentCell.format.fontSize.toString()) : 16;
+      const avgCharWidth = fontSize * 0.6; // Approximate character width
+      const cellContentWidth = 100 - 16; // Cell width minus padding
+      const charsPerLine = Math.floor(cellContentWidth / avgCharWidth);
+      
+      // Count both explicit line breaks and word wrapping
+      const lines = currentCell.value.split('\n');
+      let totalLines = 0;
+      
+      lines.forEach(line => {
+        // Add at least one line, plus additional lines for wrapped content
+        totalLines += Math.max(1, Math.ceil(line.length / charsPerLine));
+      });
+      
+      // Estimate height needed based on calculated lines
+      const lineHeight = Math.max(24, fontSize * 1.2);
+      const contentHeight = lineHeight * totalLines;
       newHeight = Math.max(newHeight, contentHeight);
     }
     
