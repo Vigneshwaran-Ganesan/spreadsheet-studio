@@ -57,13 +57,7 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col">
-      <Toolbar
-        onFormat={handleFormat}
-        onAddRow={() => {}}
-        onDeleteRow={() => {}}
-        onAddColumn={() => {}}
-        onDeleteColumn={() => {}}
-      />
+      <Toolbar onFormat={handleFormat} />
       <FormulaBar
         value={spreadsheet.data[selectedCell || '']?.formula || spreadsheet.data[selectedCell || '']?.value || ''}
         onChange={handleFormulaChange}

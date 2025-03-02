@@ -1,32 +1,27 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { 
   Bold, 
   Italic, 
   AlignLeft,
   AlignCenter,
   AlignRight,
-  Plus,
-  Minus,
-  Type
 } from 'lucide-react';
-import { Select } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from '@/components/ui/input';
 
 interface ToolbarProps {
   onFormat: (format: any) => void;
-  onAddRow: () => void;
-  onDeleteRow: () => void;
-  onAddColumn: () => void;
-  onDeleteColumn: () => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
   onFormat,
-  onAddRow,
-  onDeleteRow,
-  onAddColumn,
-  onDeleteColumn
 }) => {
   return (
     <div className="flex items-center gap-2 p-2 border-b bg-white">
@@ -72,52 +67,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       </div>
 
       <div className="flex items-center gap-2 border-r pr-2">
-        <Select
-          defaultValue="11"
-          onValueChange={(value) => onFormat({ fontSize: parseInt(value) })}
-        >
-          {[8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24].map((size) => (
-            <option key={size} value={size.toString()}>
-              {size}
-            </option>
-          ))}
+        <Select onValueChange={(value) => onFormat({ fontSize: parseInt(value) })}>
+          <SelectTrigger className="w-20">
+            <SelectValue placeholder="Size" />
+          </SelectTrigger>
+          <SelectContent>
+            {[8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24].map((size) => (
+              <SelectItem key={size} value={size.toString()}>
+                {size}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
         <Input
           type="color"
           className="w-8 h-8 p-1"
           onChange={(e) => onFormat({ color: e.target.value })}
         />
-      </div>
-
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onAddRow}
-        >
-          <Plus className="h-4 w-4 mr-1" /> Row
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onDeleteRow}
-        >
-          <Minus className="h-4 w-4 mr-1" /> Row
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onAddColumn}
-        >
-          <Plus className="h-4 w-4 mr-1" /> Column
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onDeleteColumn}
-        >
-          <Minus className="h-4 w-4 mr-1" /> Column
-        </Button>
       </div>
     </div>
   );
