@@ -80,41 +80,47 @@ export const Grid: React.FC<GridProps> = ({
         newHeight = 24; // Default height for empty cells
       } else {
         // Adjust for font size if present - use Excel-like scaling
-        if (currentCell.format?.fontSize) {
-          const fontSize = parseInt(currentCell.format.fontSize.toString());
-          // Excel uses roughly 1.33 times the font size for row height
-          // Add a small padding (4px) for better visual appearance
-          newHeight = Math.max(newHeight, Math.ceil(fontSize * 1.33) + 4);
-        }
-        
-        // Adjust for content length
-        // Calculate approximate line breaks based on content length and cell width
         const fontSize = currentCell.format?.fontSize ? parseInt(currentCell.format.fontSize.toString()) : 16;
-        const avgCharWidth = fontSize * 0.6; // Approximate character width
-        const cellWidth = columnWidths?.[cellId] || 100;
-        const cellContentWidth = cellWidth - 16; // Cell width minus padding
-        const charsPerLine = Math.floor(cellContentWidth / avgCharWidth);
         
-        // Count both explicit line breaks and word wrapping
-        const lines = currentCell.value.split('\n');
-        let totalLines = 0;
+        // Excel uses a base height that's proportional to font size
+        // Start with a base height calculation that scales with font size
+        // Excel's default row height is about 20px for 11pt font, so scale accordingly
+        const baseHeight = Math.max(24, Math.ceil(fontSize * 1.5));
+        newHeight = baseHeight;
         
-        lines.forEach(line => {
-          if (line.trim() === '') {
-            totalLines += 1; // Count empty lines as one line
-          } else {
-            // Add at least one line, plus additional lines for wrapped content
-            totalLines += Math.max(1, Math.ceil(line.length / Math.max(1, charsPerLine)));
-          }
-        });
-        
-        // Excel adds minimal padding for line wrapping
-        totalLines += 0.2; // Just a small buffer
-        
-        // Estimate height needed based on calculated lines - Excel style
-        const lineHeight = Math.max(24, Math.round(fontSize * 1.33));
-        const contentHeight = Math.ceil(lineHeight * totalLines);
-        newHeight = Math.max(newHeight, contentHeight);
+        // If there's content, calculate more precisely
+        if (currentCell.value && currentCell.value !== '') {
+          // Calculate approximate line breaks based on content length and cell width
+          const avgCharWidth = fontSize * 0.6; // Approximate character width
+          const cellWidth = columnWidths?.[cellId] || 100;
+          const cellContentWidth = cellWidth - 10; // Cell width minus padding
+          const charsPerLine = Math.floor(cellContentWidth / avgCharWidth);
+          
+          // Count both explicit line breaks and word wrapping
+          const lines = currentCell.value.split('\n');
+          let totalLines = 0;
+          
+          lines.forEach(line => {
+            if (line.trim() === '') {
+              totalLines += 1; // Count empty lines as one line
+            } else {
+              // Add at least one line, plus additional lines for wrapped content
+              totalLines += Math.max(1, Math.ceil(line.length / Math.max(1, charsPerLine)));
+            }
+          });
+          
+          // Excel-style line height calculation
+          const lineHeight = Math.max(Math.round(fontSize * 1.2), 20);
+          
+          // Calculate total height needed for all lines
+          const contentHeight = Math.ceil(lineHeight * totalLines);
+          
+          // Add a small padding for better visual appearance (like Excel)
+          const paddedHeight = contentHeight + 6;
+          
+          // Use the larger of base height or calculated content height
+          newHeight = Math.max(baseHeight, paddedHeight);
+        }
         
         console.log(`Cell ${cellId}: fontSize=${fontSize}, lines=${totalLines}, newHeight=${newHeight}`);
       }
