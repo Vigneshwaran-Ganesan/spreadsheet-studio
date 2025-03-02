@@ -167,7 +167,7 @@ export const Grid: React.FC<GridProps> = ({
 
   return (
     <div className="overflow-auto h-full" ref={gridRef}>
-      <div className="relative min-w-max">
+      <div className="relative min-w-max bg-white">
         {/* Column Headers */}
         <div className="sticky top-0 z-10 flex bg-gray-100">
           <div className="w-10 h-8 border-b border-r border-gray-300"></div>

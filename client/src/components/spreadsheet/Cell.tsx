@@ -148,7 +148,7 @@ export const Cell: React.FC<CellProps> = ({
     <div
       className={cn(
         "border-b border-r border-gray-300 relative",
-        selected && "ring-2 ring-blue-500 ring-inset z-10",
+        selected && "ring-2 ring-green-600 ring-inset z-10",
         cell.format?.bold && "font-bold",
         cell.format?.italic && "italic"
       )}
@@ -191,10 +191,11 @@ export const Cell: React.FC<CellProps> = ({
             alignItems: "center", // Vertical center alignment like Excel
             justifyContent: cell.format?.align === 'center' ? "center" : 
                           cell.format?.align === 'right' ? "flex-end" : "flex-start",
-            padding: "0 8px", // Excel uses less vertical padding and more horizontal padding
+            padding: "0 5px", // Excel uses minimal padding
             boxSizing: "border-box",
             overflow: "hidden",
-            textOverflow: "ellipsis"
+            textOverflow: "ellipsis",
+            userSelect: "none"  // Excel prevents text selection in display mode
           }}
         >
           {formatCell(cell)}
