@@ -52,6 +52,7 @@ export const Cell: React.FC<CellProps> = ({
   // This prevents the cell from expanding when just clicked
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Only select the cell without triggering any content change
     onSelect();
   };
 

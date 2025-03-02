@@ -64,22 +64,29 @@ export const Grid: React.FC<GridProps> = ({
       }
     });
 
-    // Only adjust height if content (value) has changed, not just formatting
-    if (updates.value !== undefined || updates.formula !== undefined) {
+    // Only adjust height if content is actually entered or if font size changes,
+    // not just for selection or other format changes
+    if ((updates.value !== undefined && updates.value !== '') || 
+        (updates.formula !== undefined && updates.formula !== '') || 
+        (updates.format?.fontSize !== undefined && currentCell.value)) {
+      
       const { row } = getCellCoordinates(cellId);
       const rowStr = row.toString();
       
       // Calculate new height based on content and formatting
       let newHeight = 24; // Default height
       
-      // Adjust for font size if present
-      if (currentCell.format?.fontSize) {
-        const fontSize = parseInt(currentCell.format.fontSize.toString());
-        newHeight = Math.max(newHeight, Math.ceil(fontSize * 1.5));
-      }
-      
-      // Adjust for content length
-      if (currentCell.value) {
+      // If there's no content, don't expand the cell
+      if (!currentCell.value || currentCell.value === '') {
+        newHeight = 24; // Default height for empty cells
+      } else {
+        // Adjust for font size if present
+        if (currentCell.format?.fontSize) {
+          const fontSize = parseInt(currentCell.format.fontSize.toString());
+          newHeight = Math.max(newHeight, Math.ceil(fontSize * 1.5));
+        }
+        
+        // Adjust for content length
         // Calculate approximate line breaks based on content length and cell width
         const fontSize = currentCell.format?.fontSize ? parseInt(currentCell.format.fontSize.toString()) : 16;
         const avgCharWidth = fontSize * 0.6; // Approximate character width
@@ -92,8 +99,12 @@ export const Grid: React.FC<GridProps> = ({
         let totalLines = 0;
         
         lines.forEach(line => {
-          // Add at least one line, plus additional lines for wrapped content
-          totalLines += Math.max(1, Math.ceil(line.length / Math.max(1, charsPerLine)));
+          if (line.trim() === '') {
+            totalLines += 1; // Count empty lines as one line
+          } else {
+            // Add at least one line, plus additional lines for wrapped content
+            totalLines += Math.max(1, Math.ceil(line.length / Math.max(1, charsPerLine)));
+          }
         });
         
         // Add extra padding to prevent text cutting off
