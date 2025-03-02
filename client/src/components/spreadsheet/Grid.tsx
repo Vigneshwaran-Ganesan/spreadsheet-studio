@@ -25,9 +25,18 @@ export const Grid: React.FC<GridProps> = ({ data, onChange, columnWidths, rowHei
 
   const updateCell = useCallback((cellId: string, updates: Partial<CellType>) => {
     const newData = { ...data };
-    newData[cellId] = { ...newData[cellId], ...updates };
 
-    // Update dependent cells
+    // Update the current cell
+    const currentCell = { ...newData[cellId], ...updates };
+    newData[cellId] = currentCell;
+
+    // If this is a formula, evaluate it immediately
+    if (currentCell.formula) {
+      currentCell.value = evaluateFormula(currentCell.formula, getCellValue) || '';
+      newData[cellId] = currentCell;
+    }
+
+    // Find and update dependent cells
     const dependencies = new Set<string>();
     Object.entries(newData).forEach(([id, cell]) => {
       if (cell.formula) {
@@ -40,9 +49,8 @@ export const Grid: React.FC<GridProps> = ({ data, onChange, columnWidths, rowHei
 
     dependencies.forEach(depId => {
       const cell = newData[depId];
-      if (cell.formula) {
-        const value = evaluateFormula(cell.formula, getCellValue);
-        newData[depId] = { ...cell, value };
+      if (cell?.formula) {
+        cell.value = evaluateFormula(cell.formula, getCellValue) || '';
       }
     });
 

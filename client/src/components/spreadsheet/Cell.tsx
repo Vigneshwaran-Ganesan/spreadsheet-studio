@@ -58,7 +58,7 @@ export const Cell: React.FC<CellProps> = ({
   return (
     <div
       className={cn(
-        "border-b border-r border-gray-300 relative",
+        "border-b border-r border-gray-300 relative flex items-center",
         selected && "ring-2 ring-blue-500 ring-inset z-10",
         cell.format?.bold && "font-bold",
         cell.format?.italic && "italic"
@@ -82,7 +82,7 @@ export const Cell: React.FC<CellProps> = ({
           onKeyDown={handleKeyDown}
         />
       ) : (
-        <div className="px-2 py-1 w-full h-full overflow-hidden text-ellipsis whitespace-nowrap">
+        <div className="px-2 w-full h-full flex items-center overflow-hidden text-ellipsis whitespace-nowrap">
           {formatCell(cell)}
         </div>
       )}
