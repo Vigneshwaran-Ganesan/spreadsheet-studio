@@ -10,7 +10,8 @@ export const cellSchema = z.object({
     bold: z.boolean().optional(),
     italic: z.boolean().optional(),
     fontSize: z.number().optional(),
-    color: z.string().optional()
+    color: z.string().optional(),
+    align: z.enum(['left', 'center', 'right']).optional()
   }).optional()
 });
 

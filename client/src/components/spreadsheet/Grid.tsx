@@ -79,12 +79,12 @@ export const Grid: React.FC<GridProps> = ({
       if (!currentCell.value || currentCell.value === '') {
         newHeight = 24; // Default height for empty cells
       } else {
-        // Adjust for font size if present
+        // Adjust for font size if present - use Excel-like scaling
         if (currentCell.format?.fontSize) {
           const fontSize = parseInt(currentCell.format.fontSize.toString());
-          // Make sure we give extra space for bigger font sizes
-          // Use a higher multiplier to ensure proper padding
-          newHeight = Math.max(newHeight, Math.ceil(fontSize * 2.2));
+          // Excel uses roughly 1.33 times the font size for row height
+          // Add a small padding (4px) for better visual appearance
+          newHeight = Math.max(newHeight, Math.ceil(fontSize * 1.33) + 4);
         }
         
         // Adjust for content length
@@ -108,12 +108,11 @@ export const Grid: React.FC<GridProps> = ({
           }
         });
         
-        // Add extra padding to prevent text cutting off
-        // Use more padding for larger content
-        totalLines += currentCell.value.length > 10 ? 2 : 1.5; 
+        // Excel adds minimal padding for line wrapping
+        totalLines += 0.2; // Just a small buffer
         
-        // Estimate height needed based on calculated lines
-        const lineHeight = Math.max(24, fontSize * 1.5);
+        // Estimate height needed based on calculated lines - Excel style
+        const lineHeight = Math.max(24, Math.round(fontSize * 1.33));
         const contentHeight = Math.ceil(lineHeight * totalLines);
         newHeight = Math.max(newHeight, contentHeight);
         

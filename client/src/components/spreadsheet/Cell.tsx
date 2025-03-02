@@ -188,10 +188,10 @@ export const Cell: React.FC<CellProps> = ({
             wordBreak: "break-word",
             whiteSpace: "pre-wrap",
             display: "flex",
-            alignItems: "center",
+            alignItems: "center", // Vertical center alignment like Excel
             justifyContent: cell.format?.align === 'center' ? "center" : 
                           cell.format?.align === 'right' ? "flex-end" : "flex-start",
-            padding: "4px 8px",
+            padding: "0 8px", // Excel uses less vertical padding and more horizontal padding
             boxSizing: "border-box",
             overflow: "hidden",
             textOverflow: "ellipsis"
