@@ -64,10 +64,12 @@ export const Grid: React.FC<GridProps> = ({
       }
     });
 
-    // Only adjust height if content is actually entered or if font size changes,
-    // not just for selection or other format changes
-    if ((updates.value !== undefined && updates.value !== '') || 
-        (updates.formula !== undefined && updates.formula !== '') || 
+    // Only adjust height if there's significant content or a font size change
+    // For initial text entry, use default height until content is substantial
+    const hasSignificantContent = (currentCell.value && currentCell.value.length > 20) || 
+                                currentCell.value?.includes('\n');
+    
+    if ((hasSignificantContent && (updates.value !== undefined || updates.formula !== undefined)) || 
         (updates.format?.fontSize !== undefined && currentCell.value)) {
       
       const { row } = getCellCoordinates(cellId);

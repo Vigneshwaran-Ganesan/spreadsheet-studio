@@ -190,7 +190,8 @@ export const Cell: React.FC<CellProps> = ({
             display: "block",
             padding: "4px 8px",
             boxSizing: "border-box",
-            overflow: "hidden"
+            overflow: "hidden",
+            textOverflow: "ellipsis"
           }}
         >
           {formatCell(cell)}
