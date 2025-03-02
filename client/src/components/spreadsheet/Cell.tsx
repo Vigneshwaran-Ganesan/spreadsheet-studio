@@ -27,6 +27,7 @@ export const Cell: React.FC<CellProps> = ({
   height
 }) => {
   const [editing, setEditing] = useState(false);
+  const [keyInterval, setKeyInterval] = useState<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -36,12 +37,24 @@ export const Cell: React.FC<CellProps> = ({
     }
   }, [selected, editing]);
 
+  useEffect(() => {
+    return () => {
+      if (keyInterval) {
+        clearInterval(keyInterval);
+      }
+    };
+  }, [keyInterval]);
+
   const handleDoubleClick = () => {
     setEditing(true);
   };
 
   const handleBlur = () => {
     setEditing(false);
+    if (keyInterval) {
+      clearInterval(keyInterval);
+      setKeyInterval(null);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -53,29 +66,47 @@ export const Cell: React.FC<CellProps> = ({
       setEditing(false);
       onNavigate?.('right');
     } else if (selected && !editing) {
+      let direction: 'up' | 'down' | 'left' | 'right' | null = null;
+
       switch (e.key) {
         case 'ArrowUp':
-          e.preventDefault();
-          onNavigate?.('up');
+          direction = 'up';
           break;
         case 'ArrowDown':
-          e.preventDefault();
-          onNavigate?.('down');
+          direction = 'down';
           break;
         case 'ArrowLeft':
-          e.preventDefault();
-          onNavigate?.('left');
+          direction = 'left';
           break;
         case 'ArrowRight':
-          e.preventDefault();
-          onNavigate?.('right');
+          direction = 'right';
           break;
         case 'F2':
         case 'Enter':
           e.preventDefault();
           setEditing(true);
-          break;
+          return;
       }
+
+      if (direction) {
+        e.preventDefault();
+        onNavigate?.(direction);
+
+        // Set up interval for continuous navigation
+        if (!keyInterval) {
+          const interval = setInterval(() => {
+            onNavigate?.(direction!);
+          }, 100); // Adjust timing as needed
+          setKeyInterval(interval);
+        }
+      }
+    }
+  };
+
+  const handleKeyUp = (e: React.KeyboardEvent) => {
+    if (keyInterval) {
+      clearInterval(keyInterval);
+      setKeyInterval(null);
     }
   };
 
@@ -123,6 +154,7 @@ export const Cell: React.FC<CellProps> = ({
       onClick={onSelect}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleKeyDown}
+      onKeyUp={handleKeyUp}
       tabIndex={selected ? 0 : -1}
     >
       {editing ? (
@@ -133,6 +165,7 @@ export const Cell: React.FC<CellProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
         />
       ) : (
         <div className="px-2 w-full h-full flex items-center overflow-hidden text-ellipsis whitespace-nowrap">

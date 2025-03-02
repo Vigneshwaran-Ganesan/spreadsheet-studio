@@ -14,6 +14,14 @@ export function evaluateFormula(formula: string, getCellValue: (ref: string) => 
       return calculateMin(expression, getCellValue);
     } else if (expression.startsWith('COUNT(')) {
       return calculateCount(expression, getCellValue);
+    } else if (expression.startsWith('STDEV(')) {
+      return calculateStandardDeviation(expression, getCellValue);
+    } else if (expression.startsWith('PRODUCT(')) {
+      return calculateProduct(expression, getCellValue);
+    } else if (expression.startsWith('POWER(')) {
+      return calculatePower(expression, getCellValue);
+    } else if (expression.startsWith('ROUND(')) {
+      return roundNumber(expression, getCellValue);
     } else if (expression.startsWith('TRIM(')) {
       return applyTrim(expression, getCellValue);
     } else if (expression.startsWith('UPPER(')) {
@@ -24,6 +32,8 @@ export function evaluateFormula(formula: string, getCellValue: (ref: string) => 
       return removeDuplicates(expression, getCellValue);
     } else if (expression.startsWith('FIND_AND_REPLACE(')) {
       return findAndReplace(expression, getCellValue);
+    } else if (expression.startsWith('CONCATENATE(')) {
+      return concatenateValues(expression, getCellValue);
     }
   } catch (error) {
     return '#ERROR!';
@@ -33,6 +43,9 @@ export function evaluateFormula(formula: string, getCellValue: (ref: string) => 
 }
 
 function parseRange(range: string): string[] {
+  // Handle absolute references (e.g., $A$1)
+  range = range.replace(/\$/g, '');
+
   // Handle comma-separated references
   if (range.includes(',')) {
     return range.split(',').map(ref => ref.trim());
@@ -77,6 +90,44 @@ function calculateSum(formula: string, getCellValue: (ref: string) => string | u
   const values = getRangeValues(range, getCellValue);
   if (values.length === 0) return '0';
   return values.reduce((sum, val) => (sum || 0) + (val || 0), 0).toString();
+}
+
+function calculateProduct(formula: string, getCellValue: (ref: string) => string | undefined): string {
+  const range = extractRange(formula);
+  const values = getRangeValues(range, getCellValue);
+  if (values.length === 0) return '0';
+  return values.reduce((product, val) => (product || 1) * (val || 1), 1).toString();
+}
+
+function calculatePower(formula: string, getCellValue: (ref: string) => string | undefined): string {
+  const [base, exponent] = extractRange(formula).split(',').map(ref => {
+    const value = getCellValue(ref.trim());
+    return value ? parseFloat(value) : undefined;
+  });
+
+  if (base === undefined || exponent === undefined) return '#ERROR!';
+  return Math.pow(base, exponent).toString();
+}
+
+function roundNumber(formula: string, getCellValue: (ref: string) => string | undefined): string {
+  const [number, decimals] = extractRange(formula).split(',').map(ref => {
+    const value = getCellValue(ref.trim());
+    return value ? parseFloat(value) : undefined;
+  });
+
+  if (number === undefined || decimals === undefined) return '#ERROR!';
+  return number.toFixed(decimals);
+}
+
+function calculateStandardDeviation(formula: string, getCellValue: (ref: string) => string | undefined): string {
+  const range = extractRange(formula);
+  const values = getRangeValues(range, getCellValue);
+  if (values.length < 2) return '#N/A';
+
+  const mean = values.reduce((sum, val) => (sum || 0) + (val || 0), 0) / values.length;
+  const squaredDiffs = values.map(val => Math.pow((val || 0) - mean, 2));
+  const variance = squaredDiffs.reduce((sum, val) => sum + val, 0) / (values.length - 1);
+  return Math.sqrt(variance).toString();
 }
 
 function calculateAverage(formula: string, getCellValue: (ref: string) => string | undefined): string {
@@ -144,4 +195,10 @@ function findAndReplace(formula: string, getCellValue: (ref: string) => string |
   const replaceStr = replace.replace(/^["']|["']$/g, '');
 
   return value.replace(new RegExp(findStr, 'g'), replaceStr);
+}
+
+function concatenateValues(formula: string, getCellValue: (ref: string) => string | undefined): string {
+  const range = extractRange(formula);
+  const cells = parseRange(range);
+  return cells.map(cell => getCellValue(cell) || '').join('');
 }
