@@ -26,19 +26,25 @@ export default function Home() {
   const handleFormat = (format: any) => {
     if (!selectedCell) return;
 
-    setSpreadsheet(prev => ({
-      ...prev,
-      data: {
-        ...prev.data,
-        [selectedCell]: {
-          ...prev.data[selectedCell],
-          format: {
-            ...prev.data[selectedCell]?.format,
-            ...format
+    // Update only the format without triggering height recalculation
+    setSpreadsheet(prev => {
+      const updatedSpreadsheet = {
+        ...prev,
+        data: {
+          ...prev.data,
+          [selectedCell]: {
+            ...prev.data[selectedCell],
+            format: {
+              ...prev.data[selectedCell]?.format,
+              ...format
+            }
           }
         }
-      }
-    }));
+      };
+      
+      // Preserve existing row heights
+      return updatedSpreadsheet;
+    });
   };
 
   const getCellValue = (cellId: string) => {

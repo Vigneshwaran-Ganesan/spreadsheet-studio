@@ -64,64 +64,65 @@ export const Grid: React.FC<GridProps> = ({
       }
     });
 
-    // Ensure cell sizes adjust properly when format changes or content changes
-    const { row } = getCellCoordinates(cellId);
-    const rowStr = row.toString();
-    
-    // Calculate new height based on content and formatting
-    let newHeight = 24; // Default height
-    
-    // Adjust for font size if present
-    if (currentCell.format?.fontSize) {
-      const fontSize = parseInt(currentCell.format.fontSize.toString());
-      newHeight = Math.max(newHeight, Math.ceil(fontSize * 1.5));
-    }
-    
-    // Adjust for content length
-    if (currentCell.value) {
-      // Calculate approximate line breaks based on content length and cell width
-      const fontSize = currentCell.format?.fontSize ? parseInt(currentCell.format.fontSize.toString()) : 16;
-      const avgCharWidth = fontSize * 0.6; // Approximate character width
-      const cellWidth = columnWidths?.[cellId] || 100;
-      const cellContentWidth = cellWidth - 16; // Cell width minus padding
-      const charsPerLine = Math.floor(cellContentWidth / avgCharWidth);
+    // Only adjust height if content (value) has changed, not just formatting
+    if (updates.value !== undefined || updates.formula !== undefined) {
+      const { row } = getCellCoordinates(cellId);
+      const rowStr = row.toString();
       
-      // Count both explicit line breaks and word wrapping
-      const lines = currentCell.value.split('\n');
-      let totalLines = 0;
+      // Calculate new height based on content and formatting
+      let newHeight = 24; // Default height
       
-      lines.forEach(line => {
-        // Add at least one line, plus additional lines for wrapped content
-        totalLines += Math.max(1, Math.ceil(line.length / Math.max(1, charsPerLine)));
-      });
+      // Adjust for font size if present
+      if (currentCell.format?.fontSize) {
+        const fontSize = parseInt(currentCell.format.fontSize.toString());
+        newHeight = Math.max(newHeight, Math.ceil(fontSize * 1.5));
+      }
       
-      // Add extra padding to prevent text cutting off
-      totalLines += 1.5; 
+      // Adjust for content length
+      if (currentCell.value) {
+        // Calculate approximate line breaks based on content length and cell width
+        const fontSize = currentCell.format?.fontSize ? parseInt(currentCell.format.fontSize.toString()) : 16;
+        const avgCharWidth = fontSize * 0.6; // Approximate character width
+        const cellWidth = columnWidths?.[cellId] || 100;
+        const cellContentWidth = cellWidth - 16; // Cell width minus padding
+        const charsPerLine = Math.floor(cellContentWidth / avgCharWidth);
+        
+        // Count both explicit line breaks and word wrapping
+        const lines = currentCell.value.split('\n');
+        let totalLines = 0;
+        
+        lines.forEach(line => {
+          // Add at least one line, plus additional lines for wrapped content
+          totalLines += Math.max(1, Math.ceil(line.length / Math.max(1, charsPerLine)));
+        });
+        
+        // Add extra padding to prevent text cutting off
+        totalLines += 1.5; 
+        
+        // Estimate height needed based on calculated lines
+        const lineHeight = Math.max(24, fontSize * 1.5);
+        const contentHeight = Math.ceil(lineHeight * totalLines);
+        newHeight = Math.max(newHeight, contentHeight);
+        
+        console.log(`Cell ${cellId}: fontSize=${fontSize}, lines=${totalLines}, newHeight=${newHeight}`);
+      }
       
-      // Estimate height needed based on calculated lines
-      const lineHeight = Math.max(24, fontSize * 1.5);
-      const contentHeight = Math.ceil(lineHeight * totalLines);
-      newHeight = Math.max(newHeight, contentHeight);
+      // Update the spreadsheet with the new row height
+      if (!newData._rowHeights) {
+        newData._rowHeights = {};
+      }
       
-      console.log(`Cell ${cellId}: fontSize=${fontSize}, lines=${totalLines}, newHeight=${newHeight}`);
-    }
-    
-    // Update the spreadsheet with the new row height
-    if (!newData._rowHeights) {
-      newData._rowHeights = {};
-    }
-    
-    // Only update if the height has changed and ONLY for the specific row
-    // We don't want A1 affecting A2's height
-    if (newData._rowHeights[rowStr] !== newHeight) {
-      newData._rowHeights = {
-        ...newData._rowHeights,
-        [rowStr]: newHeight
-      };
-      
-      // Force a re-render by updating the row height in the state
-      if (onChange) {
-        console.log(`Updating row ${rowStr} height to ${newHeight}px`);
+      // Only update if the height has changed and ONLY for the specific row
+      if (newData._rowHeights[rowStr] !== newHeight) {
+        newData._rowHeights = {
+          ...newData._rowHeights,
+          [rowStr]: newHeight
+        };
+        
+        // Force a re-render by updating the row height in the state
+        if (onChange) {
+          console.log(`Updating row ${rowStr} height to ${newHeight}px`);
+        }
       }
     }
 

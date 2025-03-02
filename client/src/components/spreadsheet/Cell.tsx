@@ -48,6 +48,12 @@ export const Cell: React.FC<CellProps> = ({
   const handleDoubleClick = () => {
     setEditing(true);
   };
+  
+  // This prevents the cell from expanding when just clicked
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect();
+  };
 
   const handleBlur = () => {
     setEditing(false);
@@ -151,7 +157,7 @@ export const Cell: React.FC<CellProps> = ({
         color: cell.format?.color,
         fontSize: cell.format?.fontSize
       }}
-      onClick={onSelect}
+      onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
