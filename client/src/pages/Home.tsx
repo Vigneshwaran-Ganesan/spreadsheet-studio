@@ -3,6 +3,7 @@ import { Grid } from '@/components/spreadsheet/Grid';
 import { Toolbar } from '@/components/spreadsheet/Toolbar';
 import { FormulaBar } from '@/components/spreadsheet/FormulaBar';
 import type { Spreadsheet } from '@shared/schema';
+import { evaluateFormula } from '@/lib/formulaParser';
 
 export default function Home() {
   const [spreadsheet, setSpreadsheet] = useState<Spreadsheet>({
@@ -39,19 +40,36 @@ export default function Home() {
     }));
   };
 
+  const getCellValue = (cellId: string) => {
+    return spreadsheet.data[cellId]?.value;
+  };
+
   const handleFormulaChange = (formula: string) => {
     if (!selectedCell) return;
 
+    const newData = { ...spreadsheet.data };
+    const currentCell = { ...newData[selectedCell] };
+
+    if (formula.startsWith('=')) {
+      currentCell.formula = formula;
+      currentCell.value = evaluateFormula(formula, getCellValue) || '';
+    } else {
+      currentCell.formula = undefined;
+      currentCell.value = formula;
+    }
+
+    newData[selectedCell] = currentCell;
+
+    // Update dependent cells
+    Object.entries(newData).forEach(([cellId, cell]) => {
+      if (cell.formula && cell.formula.includes(selectedCell)) {
+        cell.value = evaluateFormula(cell.formula, getCellValue) || '';
+      }
+    });
+
     setSpreadsheet(prev => ({
       ...prev,
-      data: {
-        ...prev.data,
-        [selectedCell]: {
-          ...prev.data[selectedCell],
-          formula: formula.startsWith('=') ? formula : undefined,
-          value: formula
-        }
-      }
+      data: newData
     }));
   };
 
