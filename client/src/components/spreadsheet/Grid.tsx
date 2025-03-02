@@ -96,10 +96,10 @@ export const Grid: React.FC<GridProps> = ({
       });
       
       // Add extra padding to prevent text cutting off
-      totalLines += 0.5; 
+      totalLines += 1.5; 
       
       // Estimate height needed based on calculated lines
-      const lineHeight = Math.max(24, fontSize * 1.4);
+      const lineHeight = Math.max(24, fontSize * 1.5);
       const contentHeight = Math.ceil(lineHeight * totalLines);
       newHeight = Math.max(newHeight, contentHeight);
       

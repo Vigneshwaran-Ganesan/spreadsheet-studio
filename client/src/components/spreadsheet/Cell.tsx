@@ -170,14 +170,14 @@ export const Cell: React.FC<CellProps> = ({
       ) : (
         <div 
           className={cn(
-            "px-2 w-full h-full overflow-hidden",
+            "px-2 w-full h-full",
             cell.format?.align === 'center' && "text-center",
             cell.format?.align === 'right' && "text-right",
             cell.format?.align === 'left' && "text-left"
           )}
           style={{
             minHeight: cell.format?.fontSize ? `${Math.ceil(parseInt(cell.format.fontSize.toString()) * 1.5)}px` : undefined,
-            height: "100%",
+            height: "auto",
             wordBreak: "break-word",
             whiteSpace: "pre-wrap",
             display: "block",
