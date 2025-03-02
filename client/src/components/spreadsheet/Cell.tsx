@@ -168,7 +168,14 @@ export const Cell: React.FC<CellProps> = ({
           onKeyUp={handleKeyUp}
         />
       ) : (
-        <div className="px-2 w-full h-full flex items-center overflow-hidden text-ellipsis whitespace-nowrap">
+        <div 
+          className={cn(
+            "px-2 w-full h-full flex items-center overflow-hidden text-ellipsis whitespace-nowrap",
+            cell.format?.align === 'center' && "justify-center text-center",
+            cell.format?.align === 'right' && "justify-end text-right",
+            cell.format?.align === 'left' && "justify-start text-left"
+          )}
+        >
           {formatCell(cell)}
         </div>
       )}

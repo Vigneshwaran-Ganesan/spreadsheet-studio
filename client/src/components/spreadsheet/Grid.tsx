@@ -66,7 +66,12 @@ export const Grid: React.FC<GridProps> = ({
 
     // Ensure cell sizes adjust properly when format changes
     if (updates.format?.fontSize) {
-      // Row height adjustment can be added here if needed
+      // Automatically adjust row height based on font size
+      const fontSize = updates.format.fontSize;
+      const newHeight = Math.max(24, Math.floor(fontSize * 1.5)); // Base height on font size
+      
+      // We could implement dynamic row height adjustment here if needed
+      // For now, we'll let the cell handle overflow
     }
 
     onChange(newData);

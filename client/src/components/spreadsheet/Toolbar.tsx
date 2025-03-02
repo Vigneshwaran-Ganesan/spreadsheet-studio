@@ -72,7 +72,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <SelectValue placeholder="Size" />
           </SelectTrigger>
           <SelectContent>
-            {[8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24].map((size) => (
+            {[8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 28, 32, 36, 42, 48, 56, 64, 72].map((size) => (
               <SelectItem key={size} value={size.toString()}>
                 {size}
               </SelectItem>
