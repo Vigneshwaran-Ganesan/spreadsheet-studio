@@ -48,7 +48,7 @@ export default function Home() {
         ...prev.data,
         [selectedCell]: {
           ...prev.data[selectedCell],
-          formula,
+          formula: formula.startsWith('=') ? formula : undefined,
           value: formula
         }
       }
@@ -59,7 +59,7 @@ export default function Home() {
     <div className="h-screen flex flex-col">
       <Toolbar onFormat={handleFormat} />
       <FormulaBar
-        value={spreadsheet.data[selectedCell || '']?.formula || spreadsheet.data[selectedCell || '']?.value || ''}
+        value={selectedCell ? (spreadsheet.data[selectedCell]?.formula || spreadsheet.data[selectedCell]?.value || '') : ''}
         onChange={handleFormulaChange}
         selectedCell={selectedCell}
       />
@@ -67,6 +67,8 @@ export default function Home() {
         <Grid
           data={spreadsheet.data}
           onChange={handleDataChange}
+          onCellSelect={setSelectedCell}
+          selectedCell={selectedCell}
           columnWidths={spreadsheet.columnWidths}
           rowHeights={spreadsheet.rowHeights}
         />

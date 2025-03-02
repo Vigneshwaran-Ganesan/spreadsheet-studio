@@ -7,13 +7,20 @@ import { getCellId, findCellDependencies } from '@/lib/cellUtils';
 interface GridProps {
   data: Spreadsheet['data'];
   onChange: (data: Spreadsheet['data']) => void;
+  onCellSelect: (cellId: string | null) => void;
+  selectedCell: string | null;
   columnWidths?: Record<string, number>;
   rowHeights?: Record<string, number>;
 }
 
-export const Grid: React.FC<GridProps> = ({ data, onChange, columnWidths, rowHeights }) => {
-  const [selectedCell, setSelectedCell] = useState<string | null>(null);
-  const [dragging, setDragging] = useState(false);
+export const Grid: React.FC<GridProps> = ({ 
+  data, 
+  onChange, 
+  onCellSelect,
+  selectedCell,
+  columnWidths, 
+  rowHeights 
+}) => {
   const gridRef = useRef<HTMLDivElement>(null);
 
   const COLS = 26;
@@ -91,7 +98,7 @@ export const Grid: React.FC<GridProps> = ({ data, onChange, columnWidths, rowHei
                   id={cellId}
                   cell={data[cellId]}
                   selected={selectedCell === cellId}
-                  onSelect={() => setSelectedCell(cellId)}
+                  onSelect={() => onCellSelect(cellId)}
                   onChange={(updates) => updateCell(cellId, updates)}
                   width={columnWidths?.[cellId] || 100}
                   height={rowHeights?.[row.toString()] || 24}
