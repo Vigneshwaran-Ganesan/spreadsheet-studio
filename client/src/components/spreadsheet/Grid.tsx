@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { Cell } from './Cell';
 import type { Cell as CellType, Spreadsheet } from '@shared/schema';
 import { evaluateFormula } from '@/lib/formulaParser';
-import { getCellId, findCellDependencies } from '@/lib/cellUtils';
+import { getCellId, findCellDependencies, getCellCoordinates } from '@/lib/cellUtils';
 
 interface GridProps {
   data: Spreadsheet['data'];
@@ -64,6 +64,30 @@ export const Grid: React.FC<GridProps> = ({
     onChange(newData);
   }, [data, onChange, getCellValue]);
 
+  const handleCellNavigation = (cellId: string, direction: 'up' | 'down' | 'left' | 'right') => {
+    const { col, row } = getCellCoordinates(cellId);
+    let newCol = col;
+    let newRow = row;
+
+    switch (direction) {
+      case 'up':
+        newRow = Math.max(1, row - 1);
+        break;
+      case 'down':
+        newRow = Math.min(ROWS, row + 1);
+        break;
+      case 'left':
+        newCol = Math.max(1, col - 1);
+        break;
+      case 'right':
+        newCol = Math.min(COLS, col + 1);
+        break;
+    }
+
+    const newCellId = getCellId(newCol, newRow);
+    onCellSelect(newCellId);
+  };
+
   return (
     <div className="overflow-auto h-full" ref={gridRef}>
       <div className="relative min-w-max">
@@ -100,6 +124,7 @@ export const Grid: React.FC<GridProps> = ({
                   selected={selectedCell === cellId}
                   onSelect={() => onCellSelect(cellId)}
                   onChange={(updates) => updateCell(cellId, updates)}
+                  onNavigate={(direction) => handleCellNavigation(cellId, direction)}
                   width={columnWidths?.[cellId] || 100}
                   height={rowHeights?.[row.toString()] || 24}
                 />

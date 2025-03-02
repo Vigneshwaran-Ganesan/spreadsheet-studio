@@ -11,6 +11,7 @@ interface CellProps {
   selected: boolean;
   onSelect: () => void;
   onChange: (updates: Partial<CellType>) => void;
+  onNavigate?: (direction: 'up' | 'down' | 'left' | 'right') => void;
   width: number;
   height: number;
 }
@@ -21,6 +22,7 @@ export const Cell: React.FC<CellProps> = ({
   selected,
   onSelect,
   onChange,
+  onNavigate,
   width,
   height
 }) => {
@@ -45,6 +47,35 @@ export const Cell: React.FC<CellProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       setEditing(false);
+      onNavigate?.('down');
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      setEditing(false);
+      onNavigate?.('right');
+    } else if (selected && !editing) {
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          onNavigate?.('up');
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          onNavigate?.('down');
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          onNavigate?.('left');
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          onNavigate?.('right');
+          break;
+        case 'F2':
+        case 'Enter':
+          e.preventDefault();
+          setEditing(true);
+          break;
+      }
     }
   };
 
@@ -91,6 +122,8 @@ export const Cell: React.FC<CellProps> = ({
       }}
       onClick={onSelect}
       onDoubleClick={handleDoubleClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={selected ? 0 : -1}
     >
       {editing ? (
         <Input
