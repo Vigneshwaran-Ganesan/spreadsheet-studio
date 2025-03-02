@@ -1,5 +1,4 @@
 # spreadsheet-studio
-# Web Application Mimicking Google Sheets
 
 ## Project Overview
 This project aims to replicate the core functionalities and user interface of Google Sheets, allowing users to perform basic spreadsheet operations such as data entry, mathematical calculations, and data quality functions.
