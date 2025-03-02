@@ -202,3 +202,56 @@ function concatenateValues(formula: string, getCellValue: (ref: string) => strin
   const cells = parseRange(range);
   return cells.map(cell => getCellValue(cell) || '').join('');
 }
+
+export function findCellDependencies(formula: string): string[] {
+  if (!formula.startsWith('=')) return [];
+  // Match both normal (A1) and absolute ($A$1) references
+  const cellRefs = formula.match(/\$?[A-Z]+\$?[0-9]+/g) || [];
+  // Normalize references by removing $ signs
+  return [...new Set(cellRefs.map(ref => normalizeReference(ref)))];
+}
+
+function normalizeReference(ref: string): string {
+  return ref.replace(/\$/g, '');
+}
+
+function getCellCoordinates(cell: string): { col: number; row: number } {
+    const match = cell.match(/([A-Z]+)([0-9]+)/);
+    if (!match) throw new Error('Invalid cell reference');
+    const col = match[1].charCodeAt(0) - 64;
+    const row = parseInt(match[2]);
+    return { col, row };
+}
+
+// Translates relative references when copying formulas between cells
+export function translateFormula(formula: string, fromCell: string, toCell: string): string {
+  if (!formula.startsWith('=')) return formula;
+
+  const fromCoords = getCellCoordinates(fromCell);
+  const toCoords = getCellCoordinates(toCell);
+  const colDiff = toCoords.col - fromCoords.col;
+  const rowDiff = toCoords.row - fromCoords.row;
+
+  return formula.replace(/(\$)?([A-Z]+)(\$)?([0-9]+)/g, (match, colAbs, col, rowAbs, row) => {
+    if (colAbs && rowAbs) return match; // Fully absolute reference
+
+    let newCol = col;
+    let newRow = row;
+
+    if (!colAbs) {
+      const colNum = col.charCodeAt(0) - 64 + colDiff;
+      if (colNum > 0) {
+        newCol = String.fromCharCode(colNum + 64);
+      }
+    }
+
+    if (!rowAbs) {
+      const rowNum = parseInt(row) + rowDiff;
+      if (rowNum > 0) {
+        newRow = rowNum.toString();
+      }
+    }
+
+    return `${colAbs || ''}${newCol}${rowAbs || ''}${newRow}`;
+  });
+}
