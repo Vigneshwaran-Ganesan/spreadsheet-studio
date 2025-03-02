@@ -85,7 +85,8 @@ export const Grid: React.FC<GridProps> = ({
         // Adjust for font size if present
         if (currentCell.format?.fontSize) {
           const fontSize = parseInt(currentCell.format.fontSize.toString());
-          newHeight = Math.max(newHeight, Math.ceil(fontSize * 1.5));
+          // Make sure we give extra space for bigger font sizes
+          newHeight = Math.max(newHeight, Math.ceil(fontSize * 2));
         }
         
         // Adjust for content length
@@ -188,7 +189,11 @@ export const Grid: React.FC<GridProps> = ({
           <div key={row} className="flex">
             <div
               className="sticky left-0 w-10 border-b border-r border-gray-300 bg-gray-100 flex items-center justify-center font-semibold"
-              style={{ height: rowHeights?.[row.toString()] || data._rowHeights?.[row.toString()] || 24 }}
+              style={{ 
+                height: rowHeights?.[row.toString()] || data._rowHeights?.[row.toString()] || 24,
+                display: "flex",
+                alignItems: "center"
+              }}
             >
               {row + 1}
             </div>
