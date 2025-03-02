@@ -111,7 +111,8 @@ export const Grid: React.FC<GridProps> = ({
       newData._rowHeights = {};
     }
     
-    // Only update if the height has changed
+    // Only update if the height has changed and ONLY for the specific row
+    // We don't want A1 affecting A2's height
     if (newData._rowHeights[rowStr] !== newHeight) {
       newData._rowHeights = {
         ...newData._rowHeights,
@@ -179,6 +180,7 @@ export const Grid: React.FC<GridProps> = ({
             </div>
             {Array.from({ length: COLS }).map((_, col) => {
               const cellId = getCellId(col + 1, row + 1);
+              const rowNum = row + 1;
               return (
                 <Cell
                   key={cellId}
@@ -189,7 +191,7 @@ export const Grid: React.FC<GridProps> = ({
                   onChange={(updates) => updateCell(cellId, updates)}
                   onNavigate={(direction) => handleCellNavigation(cellId, direction)}
                   width={columnWidths?.[cellId] || 100}
-                  height={rowHeights?.[row.toString()] || data._rowHeights?.[row.toString()] || 24}
+                  height={rowHeights?.[rowNum.toString()] || data._rowHeights?.[rowNum.toString()] || 24}
                 />
               );
             })}
