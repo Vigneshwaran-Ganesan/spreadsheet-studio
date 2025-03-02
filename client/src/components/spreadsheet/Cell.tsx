@@ -188,8 +188,9 @@ export const Cell: React.FC<CellProps> = ({
             wordBreak: "break-word",
             whiteSpace: "pre-wrap",
             display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
+            alignItems: "center",
+            justifyContent: cell.format?.align === 'center' ? "center" : 
+                          cell.format?.align === 'right' ? "flex-end" : "flex-start",
             padding: "4px 8px",
             boxSizing: "border-box",
             overflow: "hidden",

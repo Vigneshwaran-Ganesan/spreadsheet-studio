@@ -64,13 +64,10 @@ export const Grid: React.FC<GridProps> = ({
       }
     });
 
-    // Only adjust height if there's significant content or a font size change
-    // For initial text entry, use default height until content is substantial
-    const hasSignificantContent = (currentCell.value && currentCell.value.length > 20) || 
-                                currentCell.value?.includes('\n');
-    
-    if ((hasSignificantContent && (updates.value !== undefined || updates.formula !== undefined)) || 
-        (updates.format?.fontSize !== undefined && currentCell.value)) {
+    // Always adjust height when content changes or formatting changes
+    // This ensures row heights are updated appropriately
+    if (updates.value !== undefined || updates.formula !== undefined || 
+        updates.format?.fontSize !== undefined) {
       
       const { row } = getCellCoordinates(cellId);
       const rowStr = row.toString();
@@ -86,7 +83,8 @@ export const Grid: React.FC<GridProps> = ({
         if (currentCell.format?.fontSize) {
           const fontSize = parseInt(currentCell.format.fontSize.toString());
           // Make sure we give extra space for bigger font sizes
-          newHeight = Math.max(newHeight, Math.ceil(fontSize * 2));
+          // Use a higher multiplier to ensure proper padding
+          newHeight = Math.max(newHeight, Math.ceil(fontSize * 2.2));
         }
         
         // Adjust for content length
@@ -111,7 +109,8 @@ export const Grid: React.FC<GridProps> = ({
         });
         
         // Add extra padding to prevent text cutting off
-        totalLines += 1.5; 
+        // Use more padding for larger content
+        totalLines += currentCell.value.length > 10 ? 2 : 1.5; 
         
         // Estimate height needed based on calculated lines
         const lineHeight = Math.max(24, fontSize * 1.5);
