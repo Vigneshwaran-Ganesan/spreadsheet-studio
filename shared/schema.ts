@@ -23,7 +23,9 @@ export const spreadsheetSchema = z.object({
   rowHeights: z.record(z.string(), z.number()).optional()
 });
 
-export type Spreadsheet = z.infer<typeof spreadsheetSchema>;
+export type Spreadsheet = z.infer<typeof spreadsheetSchema> & {
+  _rowHeights?: Record<string, number>;
+};
 
 export const spreadsheets = pgTable("spreadsheets", {
   id: serial("id").primaryKey(),

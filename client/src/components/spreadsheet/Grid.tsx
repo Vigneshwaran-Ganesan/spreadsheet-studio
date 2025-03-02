@@ -64,25 +64,33 @@ export const Grid: React.FC<GridProps> = ({
       }
     });
 
-    // Ensure cell sizes adjust properly when format changes
-    if (updates.format?.fontSize) {
-      // Automatically adjust row height based on font size
-      const fontSize = parseInt(updates.format.fontSize.toString());
-      const { row } = getCellCoordinates(cellId);
-      const rowStr = row.toString();
-      
-      // Calculate new height based on font size
-      const newHeight = Math.max(24, Math.ceil(fontSize * 1.5));
-      
-      // Update the spreadsheet with the new row height
-      onChange({
-        ...newData,
-        _rowHeights: {
-          ...(newData._rowHeights || {}),
-          [rowStr]: newHeight
-        }
-      });
+    // Ensure cell sizes adjust properly when format changes or content changes
+    const { row } = getCellCoordinates(cellId);
+    const rowStr = row.toString();
+    
+    // Calculate new height based on content and formatting
+    let newHeight = 24; // Default height
+    
+    // Adjust for font size if present
+    if (currentCell.format?.fontSize) {
+      const fontSize = parseInt(currentCell.format.fontSize.toString());
+      newHeight = Math.max(newHeight, Math.ceil(fontSize * 1.5));
     }
+    
+    // Adjust for content length
+    if (currentCell.value) {
+      const contentLength = currentCell.value.length;
+      const lines = currentCell.value.split('\n').length;
+      // Estimate additional height needed for long content
+      const contentHeight = Math.max(24, 24 * lines);
+      newHeight = Math.max(newHeight, contentHeight);
+    }
+    
+    // Update the spreadsheet with the new row height
+    newData._rowHeights = {
+      ...(newData._rowHeights || {}),
+      [rowStr]: newHeight
+    };
 
     onChange(newData);
   }, [data, getCellValue, onChange]);
