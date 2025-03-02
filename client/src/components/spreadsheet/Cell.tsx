@@ -140,7 +140,7 @@ export const Cell: React.FC<CellProps> = ({
   return (
     <div
       className={cn(
-        "border-b border-r border-gray-300 relative flex items-center",
+        "border-b border-r border-gray-300 relative",
         selected && "ring-2 ring-blue-500 ring-inset z-10",
         cell.format?.bold && "font-bold",
         cell.format?.italic && "italic"
@@ -177,11 +177,13 @@ export const Cell: React.FC<CellProps> = ({
           )}
           style={{
             minHeight: cell.format?.fontSize ? `${Math.ceil(parseInt(cell.format.fontSize.toString()) * 1.5)}px` : undefined,
+            height: "100%",
             wordBreak: "break-word",
             whiteSpace: "pre-wrap",
             display: "block",
             padding: "4px 8px",
-            boxSizing: "border-box"
+            boxSizing: "border-box",
+            overflow: "visible"
           }}
         >
           {formatCell(cell)}

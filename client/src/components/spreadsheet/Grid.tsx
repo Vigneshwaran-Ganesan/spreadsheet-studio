@@ -82,7 +82,8 @@ export const Grid: React.FC<GridProps> = ({
       // Calculate approximate line breaks based on content length and cell width
       const fontSize = currentCell.format?.fontSize ? parseInt(currentCell.format.fontSize.toString()) : 16;
       const avgCharWidth = fontSize * 0.6; // Approximate character width
-      const cellContentWidth = 100 - 16; // Cell width minus padding
+      const cellWidth = columnWidths?.[cellId] || 100;
+      const cellContentWidth = cellWidth - 16; // Cell width minus padding
       const charsPerLine = Math.floor(cellContentWidth / avgCharWidth);
       
       // Count both explicit line breaks and word wrapping
@@ -91,20 +92,37 @@ export const Grid: React.FC<GridProps> = ({
       
       lines.forEach(line => {
         // Add at least one line, plus additional lines for wrapped content
-        totalLines += Math.max(1, Math.ceil(line.length / charsPerLine));
+        totalLines += Math.max(1, Math.ceil(line.length / Math.max(1, charsPerLine)));
       });
       
+      // Add extra padding to prevent text cutting off
+      totalLines += 0.5; 
+      
       // Estimate height needed based on calculated lines
-      const lineHeight = Math.max(24, fontSize * 1.2);
-      const contentHeight = lineHeight * totalLines;
+      const lineHeight = Math.max(24, fontSize * 1.4);
+      const contentHeight = Math.ceil(lineHeight * totalLines);
       newHeight = Math.max(newHeight, contentHeight);
+      
+      console.log(`Cell ${cellId}: fontSize=${fontSize}, lines=${totalLines}, newHeight=${newHeight}`);
     }
     
     // Update the spreadsheet with the new row height
-    newData._rowHeights = {
-      ...(newData._rowHeights || {}),
-      [rowStr]: newHeight
-    };
+    if (!newData._rowHeights) {
+      newData._rowHeights = {};
+    }
+    
+    // Only update if the height has changed
+    if (newData._rowHeights[rowStr] !== newHeight) {
+      newData._rowHeights = {
+        ...newData._rowHeights,
+        [rowStr]: newHeight
+      };
+      
+      // Force a re-render by updating the row height in the state
+      if (onChange) {
+        console.log(`Updating row ${rowStr} height to ${newHeight}px`);
+      }
+    }
 
     onChange(newData);
   }, [data, getCellValue, onChange]);
