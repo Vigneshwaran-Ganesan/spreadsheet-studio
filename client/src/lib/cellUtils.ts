@@ -91,31 +91,3 @@ export function formatCell(cell: Cell): string {
 
   return cell.value;
 }
-
-
-// Converts absolute reference ($A$1) to normal reference (A1)
-export function normalizeReference(ref: string): string {
-  return ref.replace(/\$/g, '');
-}
-
-// Checks if a reference is absolute (column, row, or both)
-export function isAbsoluteReference(ref: string): { col: boolean; row: boolean } {
-  return {
-    col: ref.charAt(0) === '$',
-    row: ref.includes('$', 1)
-  };
-}
-
-//Rudimentary formula evaluation (needs significant improvement for production use)
-export function evaluateFormula(formula: string, cellData: {[key:string]: Cell}): string {
-    //Very basic example, only handles addition of two cells.
-    const matches = formula.match(/([A-Z]+\d+)/g);
-    if(matches && matches.length === 2){
-        const cell1 = cellData[matches[0]]?.value;
-        const cell2 = cellData[matches[1]]?.value;
-        if(typeof cell1 === 'number' && typeof cell2 === 'number'){
-            return (cell1 + cell2).toString();
-        }
-    }
-    return "Error: Formula not supported";
-}

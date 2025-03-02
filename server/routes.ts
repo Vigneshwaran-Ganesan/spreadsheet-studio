@@ -4,12 +4,6 @@ import { storage } from "./storage";
 import { insertSpreadsheetSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Get all spreadsheets (list)
-  app.get('/api/spreadsheets', async (req, res) => {
-    const spreadsheets = await storage.getAllSpreadsheets();
-    res.json(spreadsheets.map(s => ({ id: s.id, name: s.name || `Spreadsheet ${s.id}` })));
-  });
-  
   app.get('/api/spreadsheets/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     const spreadsheet = await storage.getSpreadsheet(id);

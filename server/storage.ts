@@ -1,7 +1,6 @@
 import type { Spreadsheet, InsertSpreadsheet } from "@shared/schema";
 
 export interface IStorage {
-  getAllSpreadsheets(): Promise<Spreadsheet[]>;
   getSpreadsheet(id: number): Promise<Spreadsheet | undefined>;
   createSpreadsheet(spreadsheet: InsertSpreadsheet): Promise<Spreadsheet>;
   updateSpreadsheet(id: number, spreadsheet: Partial<Spreadsheet>): Promise<Spreadsheet>;
@@ -14,10 +13,6 @@ export class MemStorage implements IStorage {
   constructor() {
     this.spreadsheets = new Map();
     this.currentId = 1;
-  }
-  
-  async getAllSpreadsheets(): Promise<Spreadsheet[]> {
-    return Array.from(this.spreadsheets.values());
   }
 
   async getSpreadsheet(id: number): Promise<Spreadsheet | undefined> {

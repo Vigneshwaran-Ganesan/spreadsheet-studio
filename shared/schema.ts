@@ -16,31 +16,11 @@ export const cellSchema = z.object({
 
 export type Cell = z.infer<typeof cellSchema>;
 
-export const chartSchema = z.object({
-  id: z.string(),
-  type: z.enum(['bar', 'line', 'pie']),
-  dataRange: z.string(),
-  labelRange: z.string().optional(),
-  title: z.string().optional(),
-  position: z.object({
-    x: z.number(),
-    y: z.number(),
-    width: z.number(),
-    height: z.number()
-  })
-});
-
-export type Chart = z.infer<typeof chartSchema>;
-
 export const spreadsheetSchema = z.object({
   id: z.number(),
-  name: z.string().optional(),
   data: z.record(z.string(), z.record(z.string(), cellSchema)),
-  _rowHeights: z.record(z.string(), z.number()).optional(),
   columnWidths: z.record(z.string(), z.number()).optional(),
-  rowHeights: z.record(z.string(), z.number()).optional(),
-  charts: z.array(chartSchema).optional(),
-  lastModified: z.date().optional()
+  rowHeights: z.record(z.string(), z.number()).optional()
 });
 
 export type Spreadsheet = z.infer<typeof spreadsheetSchema>;
